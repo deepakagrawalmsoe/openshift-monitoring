@@ -3,7 +3,7 @@ FROM image-registry.openshift-image-registry.svc:5000/openshift/nodejs:18-ubi8
 WORKDIR /app
 
 # Ensure proper permissions
-RUN mkdir -p /app && chown -R 1001:0 /app && chmod -R g+w /app
+RUN mkdir -p /app && chown -R 1001:0 /app && chmod -R 777 /app
 
 USER 1001
 
