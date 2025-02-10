@@ -1,0 +1,57 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: react-dashboard
+spec:
+  replicas: 1
+  selector:
+    app: react-dashboard
+  template:
+    metadata:
+      labels:
+        app: react-dashboard
+    spec:
+      containers:
+        - name: react-dashboard
+          image: ""
+          ports:
+            - containerPort: 3000
+  strategy:
+    type: Source
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - react-dashboard
+        from:
+          kind: ImageStreamTag
+          name: 'react-dashboard:latest'
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'react-dashboard:latest'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-dashboard
+spec:
+  selector:
+    app: react-dashboard
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: react-dashboard
+spec:
+  to:
+    kind: Service
+    name: react-dashboard
+  port:
+    targetPort: 3000
