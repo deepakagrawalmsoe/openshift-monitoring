@@ -13,9 +13,10 @@ spec:
     spec:
       containers:
         - name: flask-monitoring
-          image: ""
+          image: image-registry.openshift-image-registry.svc:5000/deepakagrawalmsoe-dev/flask-monitoring:latest
           ports:
             - containerPort: 5000
+              protocol: TCP
           env:
             - name: TOKEN
               valueFrom:
@@ -23,7 +24,7 @@ spec:
                   name: openshift-token
                   key: token
   strategy:
-    type: Source
+    type: Rolling
   triggers:
     - type: ConfigChange
     - type: ImageChange
@@ -34,10 +35,6 @@ spec:
         from:
           kind: ImageStreamTag
           name: 'flask-monitoring:latest'
-  output:
-    to:
-      kind: ImageStreamTag
-      name: 'flask-monitoring:latest'
 ---
 apiVersion: v1
 kind: Service
@@ -47,7 +44,8 @@ spec:
   selector:
     app: flask-monitoring
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 5000
       targetPort: 5000
 ---
