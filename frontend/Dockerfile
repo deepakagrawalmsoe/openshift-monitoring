@@ -13,8 +13,8 @@ ENV HOME=/app
 # Copy package files first (for better caching)
 COPY package.json /app/
 
-# Ensure npm cache is writable
-RUN npm config set cache /tmp/npm-cache --global
+# Ensure npm cache is writable (without --global)
+RUN npm config set cache /tmp/npm-cache
 
 # Install dependencies with necessary flags
 RUN npm install --no-optional --no-audit --no-fund --unsafe-perm=true
