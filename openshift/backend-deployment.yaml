@@ -1,0 +1,63 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: flask-monitoring
+spec:
+  replicas: 1
+  selector:
+    app: flask-monitoring
+  template:
+    metadata:
+      labels:
+        app: flask-monitoring
+    spec:
+      containers:
+        - name: flask-monitoring
+          image: ""
+          ports:
+            - containerPort: 5000
+          env:
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openshift-token
+                  key: token
+  strategy:
+    type: Source
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - flask-monitoring
+        from:
+          kind: ImageStreamTag
+          name: 'flask-monitoring:latest'
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'flask-monitoring:latest'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-monitoring
+spec:
+  selector:
+    app: flask-monitoring
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: flask-monitoring
+spec:
+  to:
+    kind: Service
+    name: flask-monitoring
+  port:
+    targetPort: 5000
