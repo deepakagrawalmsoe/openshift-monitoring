@@ -12,6 +12,10 @@ def fetch_metrics():
     response = requests.get(url, headers=headers, verify=False)
     return response.json()
 
+@app.route('/')
+def home():
+    return "Flask Monitoring API is running. Use /metrics to fetch data."
+    
 @app.route('/metrics')
 def get_metrics():
     data = fetch_metrics()
