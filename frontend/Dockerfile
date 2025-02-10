@@ -1,24 +1,29 @@
-# Use Node.js base image from OpenShift
 FROM image-registry.openshift-image-registry.svc:5000/openshift/nodejs:18-ubi8
 
-# Set working directory inside the container
 WORKDIR /app
 
-# Ensure non-root user can access the directory
-RUN mkdir -p /app && chown -R 1001:0 /app
+# Ensure proper permissions
+RUN mkdir -p /app && chown -R 1001:0 /app && chmod -R g+w /app
+
 USER 1001
 
-# Copy package.json first to leverage Docker caching
+# Set HOME for npm
+ENV HOME=/app
+
+# Copy package files first (for better caching)
 COPY package.json /app/
 
-# Install dependencies
-RUN npm install --no-optional --no-audit --no-fund
+# Ensure npm cache is writable
+RUN npm config set cache /tmp/npm-cache --global
 
-# Copy the rest of the application code
+# Install dependencies with necessary flags
+RUN npm install --no-optional --no-audit --no-fund --unsafe-perm=true
+
+# Copy the rest of the app files
 COPY . /app
 
-# Expose the port the app runs on
+# Expose port
 EXPOSE 3000
 
-# Command to start the application
+# Start the app
 CMD ["npm", "start"]
