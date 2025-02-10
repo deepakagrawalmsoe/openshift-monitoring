@@ -1,0 +1,24 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: flask-monitoring
+spec:
+  source:
+    type: Git
+    git:
+      uri: "https://github.com/deepakagrawalmsoe/openshift-monitoring.git"
+    contextDir: "backend"  # Change if your Flask app is in a different directory
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: "python:3.9"  # Using Python 3.9 as the builder image
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "flask-monitoring:latest"
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
