@@ -1,33 +1,21 @@
-FROM image-registry.openshift-image-registry.svc:5000/openshift/nodejs:18-ubi8
+# Use an official Node.js image to build the React app
+FROM node:18 as build
 
 WORKDIR /app
 
-# Ensure proper permissions
-RUN mkdir -p /app && chown -R 1001:0 /app && chmod -R 777 /app
-
-USER 1001
-
-# Set HOME for npm
-ENV HOME=/app
-
-# Copy package files first (for better caching)
+# Copy package.json and package-lock.json, then install dependencies
 COPY package.json /app/
+RUN npm install
 
-# Ensure npm cache is writable (without --global)
-RUN npm config set cache /tmp/npm-cache
+# Copy the source files and build the app
+COPY . /app/
+RUN npm run build
 
-# Install dependencies with necessary flags
-#RUN npm install --no-optional --no-audit --no-fund --unsafe-perm=true
-RUN npm install --no-optional --omit=optional --no-audit --no-fund --unsafe-perm --user root
+# Use a lightweight Nginx image to serve the React app
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
 
-#RUN npm config set registry https://registry.npmjs.org/ && npm install --no-optional --no-audit --no-fund --unsafe-perm=true
+# Expose the default Nginx port
+EXPOSE 80
 
-
-# Copy the rest of the app files
-COPY . /app
-
-# Expose port
-EXPOSE 3000
-
-# Start the app
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]
