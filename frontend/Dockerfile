@@ -18,7 +18,9 @@ RUN npm config set cache /tmp/npm-cache
 
 # Install dependencies with necessary flags
 #RUN npm install --no-optional --no-audit --no-fund --unsafe-perm=true
-RUN npm config set registry https://registry.npmjs.org/ && npm install --no-optional --no-audit --no-fund --unsafe-perm=true
+RUN npm install --no-optional --omit=optional --no-audit --no-fund --unsafe-perm --user root
+
+#RUN npm config set registry https://registry.npmjs.org/ && npm install --no-optional --no-audit --no-fund --unsafe-perm=true
 
 
 # Copy the rest of the app files
